@@ -9,9 +9,9 @@ import 'dart:convert' show json, base64;
 final storage = FlutterSecureStorage();
 const String SERVER_IP = 'http://127.0.0.1:3333';
 
-Future<String> get jwtOrEmpty async {
+Future<String?> get jwtOrEmpty async {
   var jwt = await storage.read(key: "jwt");
-  if (jwt == null) return "";
+  if (jwt == null) return null;
   return jwt;
 }
 
