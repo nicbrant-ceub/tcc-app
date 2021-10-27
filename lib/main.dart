@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'pagelogin.dart';
 import 'pagemain.dart';
+import 'apiintegration.dart';
 import 'pagecardapio.dart';
+import 'dart:convert' show json, base64, ascii;
 
 void main() {
   runApp(MyApp());
@@ -13,6 +15,7 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   final Color red = Colors.red[700] ?? Colors.red;
   final Color grey = Colors.grey[700] ?? Colors.grey;
+  final homepage = const MyHomePage();
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -42,7 +45,37 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const MyHomePage(),
+      home: FutureBuilder(
+        future: jwtOrEmpty,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          if (snapshot.data != "") {
+            var str = snapshot.data.toString();
+            var jwt = str.split(".");
+
+            if (jwt.length != 3) {
+              return homepage;
+            } else {
+              var payload = json.decode(
+                  ascii.decode(base64.decode(base64.normalize(jwt[1]))));
+              // print(payload);
+              if (DateTime.fromMillisecondsSinceEpoch(
+                      (payload["iat"] + 3600 * 24 * 7) * 1000)
+                  .isAfter(DateTime.now())) {
+                return const MainPage();
+              } else {
+                return homepage;
+              }
+            }
+          } else {
+            return homepage;
+          }
+        },
+      ),
       routes: {
         '/login': (context) => const Login(),
         '/mainpage': (context) => const MainPage(),

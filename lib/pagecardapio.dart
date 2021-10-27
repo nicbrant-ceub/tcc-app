@@ -28,7 +28,16 @@ class _PageCardapioState extends State<PageCardapio> {
           children: [
             FutureBuilder(
               builder: (context, snapshot) {
-                var a = [];
+                var a = [
+                  {
+                    'title': 'produto 1',
+                    'price': 100,
+                  },
+                  {
+                    'title': 'produto 2',
+                    'price': 100,
+                  }
+                ];
                 if (snapshot.hasData) a = json.decode(snapshot.data.toString());
                 return SizedBox(
                   height: MediaQuery.of(context).size.height,
@@ -70,24 +79,47 @@ class CalendarioItem extends StatelessWidget {
           ),
         );
       },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          children: [
-            Image.network(
-              itemCalendario['image_url'],
-              width: MediaQuery.of(context).size.width * 0.45,
-            ),
-            Flexible(
-              child: Text('${itemCalendario['title']}'),
-            ),
-            Flexible(
-              child: Text('${itemCalendario['price']}'),
-            ),
-          ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+          ),
+          child: Column(
+            children: [
+              Image.network(
+                itemCalendario['image_url'] ?? '',
+                alignment: Alignment.center,
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height * 0.16,
+                fit: BoxFit.fitWidth,
+                errorBuilder: (con, err, ten) {
+                  return Icon(
+                    Icons.error,
+                    size: MediaQuery.of(context).size.height * 0.16,
+                    color: Colors.grey,
+                  );
+                },
+              ),
+              Flexible(
+                child: Text(
+                  '${itemCalendario['title'] ?? ''}',
+                  style: const TextStyle(
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Flexible(
+                child: Text(
+                  'R\$ ${itemCalendario['price'] ?? ''}',
+                  style: const TextStyle(
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

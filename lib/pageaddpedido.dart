@@ -1,29 +1,26 @@
 import 'package:flutter/material.dart';
-import 'pageaddpedido.dart';
 import 'dart:convert' show json;
 
-class MainPage extends StatefulWidget {
-  const MainPage({Key? key}) : super(key: key);
+class PedidoPage extends StatefulWidget {
+  final Map? pedido;
+
+  const PedidoPage({Key? key, this.pedido}) : super(key: key);
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<PedidoPage> createState() => _PedidoPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _PedidoPageState extends State<PedidoPage> {
+  final String _titulo = 'Adicionar';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Pedidos'),
+        title: Text('${_titulo + ' '}Pedidos'),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const PedidoPage()),
-          );
-        },
+        onPressed: () {},
         child: const Icon(Icons.add),
       ),
       body: FutureBuilder(builder: (context, snapshot) {

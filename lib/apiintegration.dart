@@ -1,17 +1,16 @@
 import 'dart:async';
 import 'dart:core';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' show json, base64;
 
 final storage = FlutterSecureStorage();
-const String SERVER_IP = 'http://127.0.0.1:3333';
+const String SERVER_IP = 'http://192.168.15.239:3333';
 
-Future<String?> get jwtOrEmpty async {
+Future<String> get jwtOrEmpty async {
   var jwt = await storage.read(key: "jwt");
-  if (jwt == null) return null;
+  if (jwt == null) return '';
   return jwt;
 }
 
@@ -35,6 +34,14 @@ Future<Map?> attemptLogIn(
       var cjson = json.decode(res.body);
       return cjson;
     } else {
+      var cjson = json.decode(res.body);
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(cjson['error'] ?? 'Ocorreu um erro'),
+          ),
+        );
       return null;
     }
   } catch (error) {
