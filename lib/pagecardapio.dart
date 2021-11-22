@@ -1,9 +1,6 @@
-import 'dart:async';
 import 'dart:core';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:http/http.dart' as http;
+import 'package:tccrestaurante/apiintegration.dart';
 import 'dart:convert' show json;
 import 'pageitemcardapio.dart';
 
@@ -27,17 +24,9 @@ class _PageCardapioState extends State<PageCardapio> {
         child: ListView(
           children: [
             FutureBuilder(
+              future: getItens(context),
               builder: (context, snapshot) {
-                var a = [
-                  {
-                    'title': 'produto 1',
-                    'price': 100,
-                  },
-                  {
-                    'title': 'produto 2',
-                    'price': 100,
-                  }
-                ];
+                var a = [];
                 if (snapshot.hasData) a = json.decode(snapshot.data.toString());
                 return SizedBox(
                   height: MediaQuery.of(context).size.height,
@@ -87,9 +76,10 @@ class CalendarioItem extends StatelessWidget {
             color: Colors.white,
           ),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Image.network(
-                itemCalendario['image_url'] ?? '',
+                itemCalendario['image_url'] ?? SERVER_IP,
                 alignment: Alignment.center,
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height * 0.16,
@@ -102,20 +92,31 @@ class CalendarioItem extends StatelessWidget {
                   );
                 },
               ),
-              Flexible(
-                child: Text(
-                  '${itemCalendario['title'] ?? ''}',
-                  style: const TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              Flexible(
-                child: Text(
-                  'R\$ ${itemCalendario['price'] ?? ''}',
-                  style: const TextStyle(
-                    color: Colors.black,
-                  ),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Wrap(
+                      children: [
+                        Text(
+                          '${itemCalendario['name'] ?? ''}',
+                          style: const TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Wrap(
+                      children: [
+                        Text(
+                          'R\$ ${itemCalendario['value'] ?? ''}',
+                          style: const TextStyle(
+                            color: Colors.black,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],

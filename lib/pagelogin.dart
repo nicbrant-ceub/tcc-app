@@ -1,3 +1,4 @@
+import 'dart:convert' show json;
 import 'package:flutter/material.dart';
 import 'apiintegration.dart';
 
@@ -34,6 +35,13 @@ class _LoginState extends State<Login> {
                     Image.asset(
                       'images/logo.png',
                       width: MediaQuery.of(context).size.width * 0.65,
+                      errorBuilder: (con, err, ten) {
+                        return Icon(
+                          Icons.error,
+                          size: MediaQuery.of(context).size.height * 0.16,
+                          color: Colors.grey,
+                        );
+                      },
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -115,18 +123,26 @@ class _LoginState extends State<Login> {
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               setState(() => _loading = true);
-                              var res;
-                              if (_username.text == 'nicbrant') {
-                                res = {};
-                              } else {
-                                res = await attemptLogIn(
-                                  context,
-                                  username: _username.text,
-                                  password: _senha.text,
+
+                              var jwt = await attemptLogIn(
+                                context,
+                                username: _username.text,
+                                password: _senha.text,
+                              );
+                              if (jwt != null) {
+                                user = await getUser(jwt['token']);
+                                storage.write(
+                                  key: "jwt",
+                                  value: jwt['token'],
                                 );
-                              }
-                              if (res != null) {
-                                Navigator.pushNamed(context, '/mainpage');
+                                storage.write(
+                                  key: "user",
+                                  value: json.encode(user),
+                                );
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  '/mainpage',
+                                );
                               }
                               setState(() => _loading = false);
                             }
@@ -141,9 +157,12 @@ class _LoginState extends State<Login> {
             ],
           ),
           if (_loading)
-            const Center(
-              child: CircularProgressIndicator(),
-            )
+            Container(
+              color: const Color(0x66666666),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
         ],
       ),
     );

@@ -19,32 +19,42 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      debugShowMaterialGrid: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        scaffoldBackgroundColor: Colors.grey,
-        colorScheme: ColorScheme(
-          background: Colors.grey,
-          brightness: Brightness.light,
-          error: Colors.blue,
-          onBackground: grey,
-          onError: Colors.black,
-          onPrimary: Colors.red,
-          onSecondary: Colors.white,
-          onSurface: Colors.black,
-          primary: Colors.white,
-          primaryVariant: red,
-          secondary: Colors.red,
-          secondaryVariant: Colors.red,
-          surface: Colors.grey,
-        ),
-        textTheme: TextTheme(
-          bodyText2: TextStyle(
-            color: red,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+          scaffoldBackgroundColor: Colors.grey,
+          colorScheme: ColorScheme(
+            background: Colors.grey,
+            brightness: Brightness.light,
+            error: Colors.blue,
+            onBackground: grey,
+            onError: Colors.black,
+            onPrimary: Colors.red,
+            onSecondary: Colors.white,
+            onSurface: Colors.black,
+            primary: Colors.white,
+            primaryVariant: red,
+            secondary: Colors.red,
+            secondaryVariant: Colors.red,
+            surface: Colors.grey,
           ),
-        ),
-      ),
+          textTheme: TextTheme(
+            bodyText2: TextStyle(
+              color: red,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              primary: Colors.black,
+            ),
+          ),
+          bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+            showUnselectedLabels: false,
+            backgroundColor: Colors.red,
+          )),
       home: FutureBuilder(
         future: jwtOrEmpty,
         builder: (context, snapshot) {
@@ -79,6 +89,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const Login(),
         '/mainpage': (context) => const MainPage(),
+        '/first': (context) => const MyHomePage(),
       },
     );
   }
@@ -119,6 +130,13 @@ class _MyHomePageState extends State<MyHomePage> {
             Image.asset(
               'images/logo.png',
               width: MediaQuery.of(context).size.width,
+              errorBuilder: (con, err, ten) {
+                return Icon(
+                  Icons.error,
+                  size: MediaQuery.of(context).size.height * 0.16,
+                  color: Colors.grey,
+                );
+              },
             ),
             Container(
               height: MediaQuery.of(context).size.longestSide * 0.14,
