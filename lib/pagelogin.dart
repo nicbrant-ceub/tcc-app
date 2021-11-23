@@ -34,7 +34,7 @@ class _LoginState extends State<Login> {
                   children: [
                     Image.asset(
                       'images/logo.png',
-                      width: MediaQuery.of(context).size.width * 0.65,
+                      width: MediaQuery.of(context).size.width * 0.55,
                       errorBuilder: (con, err, ten) {
                         return Icon(
                           Icons.error,

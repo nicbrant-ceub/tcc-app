@@ -15,7 +15,12 @@ class PedidoPage extends StatefulWidget {
 class _PedidoPageState extends State<PedidoPage> {
   String _mesa = '';
   List<Map> listPedidos = [
-    {'id': null, 'quantity': 1, 'description': ''}
+    {
+      'id': null,
+      'quantity': 1,
+      'description': '',
+      'value': 0,
+    }
   ];
   List<DropdownMenuItem<String>> listdropdown = [
     const DropdownMenuItem(
@@ -32,21 +37,11 @@ class _PedidoPageState extends State<PedidoPage> {
   // ignore: prefer_typing_uninitialized_variables
   late Future<String?> _chamada;
   late Future<String?> _chamada2;
+  late List itens;
   @override
   void initState() {
     _chamada = getItens(context);
     _chamada2 = getMesas(context);
-    _chamada.then((value) {
-      List itens = json.decode(value.toString());
-      listdropdown += itens
-          .map<DropdownMenuItem<String>>(
-            (i) => DropdownMenuItem(
-              value: i['id'],
-              child: Text('${i['name']}'),
-            ),
-          )
-          .toList();
-    });
     _chamada2.then((value) {
       List itens = json.decode(value.toString());
       itens = itens.where((mesa) => mesa['busy'] == true).toList();
@@ -55,6 +50,17 @@ class _PedidoPageState extends State<PedidoPage> {
             (i) => DropdownMenuItem(
               value: i['id'],
               child: Text('${i['number']}'),
+            ),
+          )
+          .toList();
+    });
+    _chamada.then((value) {
+      itens = json.decode(value.toString());
+      listdropdown += itens
+          .map<DropdownMenuItem<String>>(
+            (i) => DropdownMenuItem(
+              value: i['id'],
+              child: Text('${i['name']}'),
             ),
           )
           .toList();
@@ -85,7 +91,8 @@ class _PedidoPageState extends State<PedidoPage> {
       body: FutureBuilder(
         future: _chamada,
         builder: (context, snapshot) {
-          if (snapshot.hasData) {
+          if (snapshot.hasData &&
+              snapshot.connectionState == ConnectionState.done) {
             List<Widget> selecionapedido = [
               Container(
                 alignment: Alignment.center,
@@ -142,7 +149,13 @@ class _PedidoPageState extends State<PedidoPage> {
                                     child: DropdownButton<String>(
                                         value: e['id'],
                                         onChanged: (Object? value) {
-                                          setState(() => e['id'] = value);
+                                          setState(() {
+                                            e['value'] = itens
+                                                .where((element) =>
+                                                    element['id'] == value)
+                                                .first['value'];
+                                            e['id'] = value;
+                                          });
                                         },
                                         alignment: Alignment.center,
                                         items: listdropdown),

@@ -233,14 +233,18 @@ Future<String?> getItens(
 
 Future<String?> putPedidos(
   BuildContext context,
-  Map order,
-) async {
+  Map order, [
+  bool done = false,
+]) async {
   var token = await storage.read(key: "jwt");
+  print("///////////////////////////////////");
+  print(order['ready']);
+  print(done);
   var body = {
     'id': order['id'],
     'bill_id': order['bill_id'],
     'ready': true,
-    'delivered': order['ready'] == true,
+    'delivered': done,
     'order_date': order['order_date'],
     'active': order['active'],
   };
@@ -392,6 +396,135 @@ Future<List?> getOrderItems(
       var cjson = json.decode(res.body);
       return cjson;
     } else {
+      var cjson = json.decode(res.body);
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(cjson['error'] ?? 'Ocorreu um erro'),
+          ),
+        );
+      return null;
+    }
+  } catch (error) {
+    ScaffoldMessenger.of(context)
+      ..removeCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('$error'),
+        ),
+      );
+    return null;
+  }
+}
+
+Future<Map?> putMesas(
+  BuildContext context,
+  Map table,
+  String lugares,
+) async {
+  var token = await storage.read(key: "jwt");
+  var body = table;
+  body['seats'] = lugares;
+  try {
+    var res = await http.put(
+      Uri.parse("$SERVER_IP/tables/"),
+      headers: {
+        'Content-Type': "application/json",
+        'Authorization': 'bearer $token',
+      },
+      body: json.encode(body),
+    );
+    if (res.statusCode == 200) {
+      print(res.body);
+      var cjson = json.decode(res.body);
+      return cjson;
+    } else {
+      var cjson = json.decode(res.body);
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(cjson['error'] ?? 'Ocorreu um erro'),
+          ),
+        );
+      return null;
+    }
+  } catch (error) {
+    ScaffoldMessenger.of(context)
+      ..removeCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('$error'),
+        ),
+      );
+    return null;
+  }
+}
+
+Future<List?> getOrderItemsByBill(
+  BuildContext context,
+  String id,
+) async {
+  var token = await storage.read(key: "jwt");
+  try {
+    var res = await http.get(
+      Uri.parse("$SERVER_IP/orderitem/byBill/$id"),
+      headers: {
+        'Content-Type': "application/json",
+        'Authorization': 'bearer $token',
+      },
+    );
+    if (res.statusCode == 200) {
+      print(res.body);
+      var cjson = json.decode(res.body);
+      return cjson;
+    } else {
+      var cjson = json.decode(res.body);
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(cjson['error'] ?? 'Ocorreu um erro'),
+          ),
+        );
+      return null;
+    }
+  } catch (error) {
+    ScaffoldMessenger.of(context)
+      ..removeCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('$error'),
+        ),
+      );
+    return null;
+  }
+}
+
+Future<Map?> closeBill(
+  BuildContext context,
+  String id,
+) async {
+  var token = await storage.read(key: "jwt");
+  var body = {'bill_id': id};
+  try {
+    var res = await http.post(
+      Uri.parse("$SERVER_IP/bills/closeBill"),
+      headers: {
+        'Content-Type': "application/json",
+        'Authorization': 'bearer $token',
+      },
+      body: json.encode(body),
+    );
+    if (res.statusCode == 200) {
+      print('res.body status 200');
+      print(res.body);
+      var cjson = json.decode(res.body);
+      return cjson;
+    } else {
+      print('res.body status error');
+      print(res.body);
       var cjson = json.decode(res.body);
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()

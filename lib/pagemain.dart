@@ -70,345 +70,392 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     Future _getMesas = getMesas(context);
+    Future _getContas = getContas(context);
     Future _getPedidos = getPedidos(context);
     final bottomNavigationBarBody = [
       if (user == null || user!['role']['name'] != 'ROLE_KITCHEN')
-        FutureBuilder(
-          future: getContas(context),
-          builder: (context, snapshot) {
-            if (snapshot.hasData &&
-                snapshot.connectionState == ConnectionState.done) {
-              var a = json.decode(snapshot.data.toString());
-              if (contas.isEmpty) {
-                contas = a;
-              }
-            }
-            return ListView(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    0,
-                    0,
-                    0,
-                    100,
-                  ),
-                  child: ExpansionPanelList(
-                    expansionCallback: (int index, bool isExpanded) {
-                      setState(
-                        () {
-                          getOrderItems(
-                            context,
-                            contas[index]['id'],
-                          ).then(
-                            (value) =>
-                                contas[index]['order_item'] = value ?? [],
-                          );
-                          contas[index]['ready'] = !isExpanded;
-                        },
-                      );
-                    },
-                    children: contas.map((e) {
-                      print(e);
-                      List<Widget> botao = [
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: Size(
-                              MediaQuery.of(context).size.width * 0.8,
-                              40,
-                            ),
+        RefreshIndicator(
+          child: ListView(
+            children: [
+              FutureBuilder(
+                future: _getContas,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData &&
+                      snapshot.connectionState == ConnectionState.done) {
+                    var a = json.decode(snapshot.data.toString());
+                    if (contas.isEmpty) {
+                      contas = a;
+                    }
+
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            0,
+                            0,
+                            0,
+                            100,
                           ),
-                          onPressed: () async {
-                            var res = await putPedidos(context, e);
-                            if (res != null) {
-                              setState(() => contas.clear());
-                              _getPedidos = getPedidos(context);
-                            }
-                          },
-                          child: const Text('Pronto'),
-                        ),
-                      ];
-                      return ExpansionPanel(
-                          headerBuilder:
-                              (BuildContext context, bool isExpanded) {
-                            return Container(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    flex: 3,
-                                    child:
-                                        Text('Mesa: ${e['table']['number']}'),
+                          child: ExpansionPanelList(
+                            expansionCallback:
+                                (int index, bool isExpanded) async {
+                              contas[index]['order_item'] =
+                                  await getOrderItemsByBill(
+                                      context, contas[index]['id']);
+                              setState(
+                                () {
+                                  contas[index]['ready'] = !isExpanded;
+                                },
+                              );
+                            },
+                            children: contas.map((e) {
+                              // print(e);
+                              List<Widget> botao = [
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    minimumSize: Size(
+                                      MediaQuery.of(context).size.width * 0.8,
+                                      40,
+                                    ),
                                   ),
-                                  Expanded(
-                                    child: Text('Total: ${e['total_value']}'),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                          body: Container(
-                            color: Colors.black26,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 10,
-                            ),
-                            child: Column(
-                              children: (e['order_item'] ?? [])
-                                      .map<Widget>(
-                                        (iten) => Container(
-                                          margin: const EdgeInsets.fromLTRB(
-                                            0,
-                                            0,
-                                            0,
-                                            10,
+                                  onPressed: () async {
+                                    var res = await closeBill(context, e['id']);
+                                    if (res != null) {
+                                      setState(() => contas.clear());
+                                      _getContas = getContas(context);
+                                    }
+                                  },
+                                  child: const Text('Fechar conta'),
+                                ),
+                              ];
+                              return ExpansionPanel(
+                                  headerBuilder:
+                                      (BuildContext context, bool isExpanded) {
+                                    return Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            flex: 3,
+                                            child: Text(
+                                                'Mesa: ${e['table']['number']}'),
                                           ),
-                                          decoration: const BoxDecoration(
-                                            border: Border(
-                                              bottom: BorderSide(
-                                                color: Colors.black,
-                                              ),
-                                            ),
+                                          Expanded(
+                                            child: Text(
+                                                'Total: ${e['total_value']}'),
                                           ),
-                                          child: Column(
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                    flex: 5,
-                                                    child: Text(
-                                                        '${iten['item']['name']}'),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                  body: Container(
+                                    color: Colors.black26,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 10,
+                                    ),
+                                    child: Column(
+                                      children: (e['order_item'] ?? [])
+                                              .map<Widget>(
+                                                (iten) => Container(
+                                                  margin:
+                                                      const EdgeInsets.fromLTRB(
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    10,
                                                   ),
-                                                  Expanded(
-                                                    child: Text(
-                                                        '${iten['quantity']}'),
-                                                  ),
-                                                ],
-                                              ),
-                                              if (iten['description'] != '')
-                                                Row(
-                                                  children: const [
-                                                    Text('    Descrição:')
-                                                  ],
-                                                ),
-                                              if (iten['description'] != '')
-                                                Row(
-                                                  children: [
-                                                    Padding(
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                        horizontal: 25,
-                                                      ),
-                                                      child: Flexible(
-                                                        child: Text(
-                                                            '${iten['description']}'),
+                                                  decoration:
+                                                      const BoxDecoration(
+                                                    border: Border(
+                                                      bottom: BorderSide(
+                                                        color: Colors.black,
                                                       ),
                                                     ),
-                                                  ],
-                                                )
-                                            ],
-                                          ),
-                                        ),
-                                      )
-                                      .toList() +
-                                  botao,
-                            ),
+                                                  ),
+                                                  child: Column(
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Expanded(
+                                                            flex: 5,
+                                                            child: Text(
+                                                                '${iten['item']['name']}'),
+                                                          ),
+                                                          Expanded(
+                                                            child: Text(
+                                                                '${iten['quantity']}'),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      if (iten['description'] !=
+                                                          '')
+                                                        Row(
+                                                          children: const [
+                                                            Text(
+                                                                '    Descrição:')
+                                                          ],
+                                                        ),
+                                                      if (iten['description'] !=
+                                                          '')
+                                                        Row(
+                                                          children: [
+                                                            Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .symmetric(
+                                                                horizontal: 25,
+                                                              ),
+                                                              child: Flexible(
+                                                                child: Text(
+                                                                    '${iten['description']}'),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        )
+                                                    ],
+                                                  ),
+                                                ),
+                                              )
+                                              .toList() +
+                                          botao,
+                                    ),
+                                  ),
+                                  isExpanded: e['ready'] ?? false);
+                            }).toList(),
                           ),
-                          isExpanded: e['ready'] ?? false);
-                    }).toList(),
-                  ),
-                ),
-              ],
+                        ),
+                      ],
+                    );
+                  }
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
+              )
+            ],
+          ),
+          onRefresh: () {
+            return Future.delayed(
+              const Duration(seconds: 1),
+              () {
+                _getContas = getContas(context);
+                setState(() {
+                  contas.clear();
+                });
+              },
             );
           },
         ),
-      FutureBuilder(
-        future: _getPedidos,
-        builder: (context, snapshot) {
-          if (snapshot.hasData &&
-              snapshot.connectionState == ConnectionState.done) {
-            pedidos = json.decode(snapshot.data.toString());
-            pedidos = pedidos
-                .where(
-                  (e) => (e['ready'] == true && e['delivered'] == false),
-                )
-                .toList();
-            if (pedidosClone.isEmpty) {
-              pedidos = pedidos.map((element) {
-                element['isExpanded'] = false;
-                return element;
-              }).toList();
-              pedidosClone = pedidos;
-            }
-          }
-          return ListView(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  0,
-                  0,
-                  0,
-                  100,
-                ),
-                child: ExpansionPanelList(
-                  expansionCallback: (int index, bool isExpanded) {
-                    setState(
-                      () {
-                        getOrderItems(
-                          context,
-                          pedidosClone[index]['id'],
-                        ).then(
-                          (value) =>
-                              pedidosClone[index]['order_item'] = value ?? [],
-                        );
-                        pedidosClone[index]['isExpanded'] = !isExpanded;
-                      },
-                    );
-                  },
-                  children: pedidosClone.map((e) {
-                    List<Widget> botao = [
-                      if (!e['ready'])
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: Size(
-                              MediaQuery.of(context).size.width * 0.8,
-                              40,
-                            ),
-                          ),
-                          onPressed: () async {
-                            var res = await putPedidos(context, e);
-                            if (res != null) {
-                              setState(() => pedidosClone.clear());
-                              _getPedidos = getPedidos(context);
-                            }
-                          },
-                          child: const Text('Pronto'),
-                        ),
-                      if (e['ready'] && !(e['delivered'] ?? false))
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            minimumSize: Size(
-                              MediaQuery.of(context).size.width * 0.8,
-                              40,
-                            ),
-                          ),
-                          onPressed: () async {
-                            var res = await putPedidos(context, e);
-                            if (res != null) {
-                              setState(() => pedidosClone.clear());
-                              _getPedidos = getPedidos(context);
-                            }
-                          },
-                          child: const Text('Entregue'),
-                        ),
-                    ];
-                    return ExpansionPanel(
-                      headerBuilder: (BuildContext context, bool isExpanded) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                flex: 2,
-                                child: Text(
-                                    'Mesa: ${e['bill']['table']['number']}'),
-                              ),
-                              if (e['ready'])
-                                const Expanded(
-                                  flex: 2,
-                                  child: Text('Pronto'),
-                                ),
-                              if (!e['ready'])
-                                const Expanded(
-                                  flex: 2,
-                                  child: Text('Em preparo'),
-                                ),
-                              Expanded(
-                                child: Text(
-                                  DateFormat('dd/MM HH:mm').format(
-                                    DateTime.parse(
-                                      e['created_at'],
-                                    ),
+      RefreshIndicator(
+        child: ListView(
+          children: [
+            FutureBuilder(
+              future: _getPedidos,
+              builder: (context, snapshot) {
+                if (snapshot.hasData &&
+                    snapshot.connectionState == ConnectionState.done) {
+                  pedidos = json.decode(snapshot.data.toString());
+                  pedidos = pedidos
+                      .where(
+                        (e) => (e['delivered'] == false),
+                      )
+                      .toList();
+                  if (pedidosClone.isEmpty) {
+                    pedidos = pedidos.map((element) {
+                      element['isExpanded'] = false;
+                      return element;
+                    }).toList();
+                    pedidosClone = pedidos;
+                  }
+                }
+                print(pedidos);
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        0,
+                        0,
+                        0,
+                        100,
+                      ),
+                      child: ExpansionPanelList(
+                        expansionCallback: (int index, bool isExpanded) {
+                          setState(
+                            () {
+                              getOrderItems(
+                                context,
+                                pedidosClone[index]['id'],
+                              ).then(
+                                (value) => pedidosClone[index]['order_item'] =
+                                    value ?? [],
+                              );
+                              pedidosClone[index]['isExpanded'] = !isExpanded;
+                            },
+                          );
+                        },
+                        children: pedidosClone.map((e) {
+                          List<Widget> botao = [
+                            if (!e['ready'])
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: Size(
+                                    MediaQuery.of(context).size.width * 0.8,
+                                    40,
                                   ),
                                 ),
+                                onPressed: () async {
+                                  var res = await putPedidos(context, e);
+                                  if (res != null) {
+                                    setState(() => pedidosClone.clear());
+                                    _getPedidos = getPedidos(context);
+                                  }
+                                },
+                                child: const Text('Pronto'),
                               ),
-                            ],
-                          ),
-                        );
-                      },
-                      body: Container(
-                        color: Colors.black26,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 10,
-                        ),
-                        child: Column(
-                          children: (e['order_item'] ?? [])
-                                  .map<Widget>(
-                                    (iten) => Container(
-                                      margin: const EdgeInsets.fromLTRB(
-                                        0,
-                                        0,
-                                        0,
-                                        10,
+                            if (e['ready'] && !(e['delivered'] ?? false))
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  minimumSize: Size(
+                                    MediaQuery.of(context).size.width * 0.8,
+                                    40,
+                                  ),
+                                ),
+                                onPressed: () async {
+                                  var res = await putPedidos(context, e, true);
+                                  if (res != null) {
+                                    setState(() => pedidosClone.clear());
+                                    _getPedidos = getPedidos(context);
+                                  }
+                                },
+                                child: const Text('Entregue'),
+                              ),
+                          ];
+                          return ExpansionPanel(
+                            headerBuilder:
+                                (BuildContext context, bool isExpanded) {
+                              return Container(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 2,
+                                      child: Text(
+                                          'Mesa: ${e['bill']['table']['number']}'),
+                                    ),
+                                    if (e['ready'])
+                                      const Expanded(
+                                        flex: 2,
+                                        child: Text('Pronto'),
                                       ),
-                                      decoration: const BoxDecoration(
-                                        border: Border(
-                                          bottom: BorderSide(
-                                            color: Colors.black,
+                                    if (!e['ready'])
+                                      const Expanded(
+                                        flex: 2,
+                                        child: Text('Em preparo'),
+                                      ),
+                                    Expanded(
+                                      child: Text(
+                                        DateFormat('dd/MM HH:mm').format(
+                                          DateTime.parse(
+                                            e['created_at'],
                                           ),
                                         ),
                                       ),
-                                      child: Column(
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                flex: 5,
-                                                child: Text(
-                                                    '${iten['item']['name']}'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                            body: Container(
+                              color: Colors.black26,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
+                              child: Column(
+                                children: (e['order_item'] ?? [])
+                                        .map<Widget>(
+                                          (iten) => Container(
+                                            margin: const EdgeInsets.fromLTRB(
+                                              0,
+                                              0,
+                                              0,
+                                              10,
+                                            ),
+                                            decoration: const BoxDecoration(
+                                              border: Border(
+                                                bottom: BorderSide(
+                                                  color: Colors.black,
+                                                ),
                                               ),
-                                              Expanded(
-                                                child:
-                                                    Text('${iten['quantity']}'),
-                                              ),
-                                            ],
-                                          ),
-                                          if (iten['description'] != '')
-                                            Row(
-                                              children: const [
-                                                Text('    Descrição:')
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                      flex: 5,
+                                                      child: Text(
+                                                          '${iten['item']['name']}'),
+                                                    ),
+                                                    Expanded(
+                                                      child: Text(
+                                                          '${iten['quantity']}'),
+                                                    ),
+                                                  ],
+                                                ),
+                                                if (iten['description'] != '')
+                                                  Row(
+                                                    children: const [
+                                                      Text('    Descrição:')
+                                                    ],
+                                                  ),
+                                                if (iten['description'] != '')
+                                                  Row(
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                          horizontal: 25,
+                                                        ),
+                                                        child: Flexible(
+                                                          child: Text(
+                                                              '${iten['description']}'),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  )
                                               ],
                                             ),
-                                          if (iten['description'] != '')
-                                            Row(
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                    horizontal: 25,
-                                                  ),
-                                                  child: Flexible(
-                                                    child: Text(
-                                                        '${iten['description']}'),
-                                                  ),
-                                                ),
-                                              ],
-                                            )
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                  .toList() +
-                              botao,
-                        ),
+                                          ),
+                                        )
+                                        .toList() +
+                                    botao,
+                              ),
+                            ),
+                            isExpanded: e['isExpanded'] ?? false,
+                          );
+                        }).toList(),
                       ),
-                      isExpanded: e['isExpanded'] ?? false,
-                    );
-                  }).toList(),
-                ),
-              ),
-            ],
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
+        onRefresh: () {
+          return Future.delayed(
+            const Duration(seconds: 1),
+            () {
+              _getPedidos = getPedidos(context);
+              setState(() {
+                pedidosClone.clear();
+              });
+            },
           );
         },
       ),
@@ -417,130 +464,156 @@ class _MainPageState extends State<MainPage> {
           future: _getMesas,
           builder: (context, snapshot) {
             List mesas = [];
-            if (snapshot.hasData) mesas = json.decode(snapshot.data.toString());
-            mesas = mesas.where((mesa) => mesa['busy'] == false).toList();
-            // print(mesas);
-            return ListView(
-              children: mesas.map((e) {
-                if (e['active']) {
-                  return Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: TextButton(
-                      onLongPress: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            newSeats = e['seats'].toString();
-                            return AlertDialog(
-                              title: Text('Editar mesa: ${e['number']}'),
-                              content: Row(
-                                children: [
-                                  const Expanded(
-                                    flex: 1,
-                                    child: Text('Lugares:'),
-                                  ),
-                                  Expanded(
-                                    flex: 2,
-                                    child: DropdownButton<String>(
-                                        value: newSeats,
-                                        onChanged: (Object? value) {
-                                          setState(() {
-                                            newSeats = value.toString();
-                                          });
+            if (snapshot.hasData &&
+                snapshot.connectionState == ConnectionState.done) {
+              mesas = json.decode(snapshot.data.toString());
+              // mesas = mesas.where((mesa) => mesa['busy'] == false).toList();
+              // print(mesas);
+              return ListView(
+                children: mesas.map((e) {
+                  if (e['active']) {
+                    return Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: TextButton(
+                        onLongPress: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              newSeats = e['seats'].toString();
+                              return AlertDialog(
+                                title: Text('Editar mesa: ${e['number']}'),
+                                content: Row(
+                                  children: [
+                                    const Expanded(
+                                      flex: 1,
+                                      child: Text('Lugares:'),
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: DropdownButton<String>(
+                                          value: newSeats,
+                                          onChanged: (Object? value) async {
+                                            var res = await putMesas(
+                                                context, e, value.toString());
+                                            if (res != null) {
+                                              Navigator.of(context,
+                                                      rootNavigator: true)
+                                                  .pop('dialog');
+                                              _getMesas = getMesas(context);
+                                              setState(() {});
+                                            }
+                                          },
+                                          alignment: Alignment.center,
+                                          items: listdropdown),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+                        },
+                        onPressed: () {
+                          if (!e['busy']) {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text(
+                                      'Deseja marcar a mesa ${e['number']} como ocupada?'),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          var res =
+                                              await createContas(context, e);
+                                          if (res != null) {
+                                            _getMesas = getMesas(context);
+                                            Navigator.of(context,
+                                                    rootNavigator: true)
+                                                .pop('dialog');
+                                            setState(() {
+                                              mesas = [];
+                                            });
+                                          }
                                         },
-                                        alignment: Alignment.center,
-                                        items: listdropdown),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      },
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text(
-                                  'Deseja marcar a mesa ${e['number']} como ocupada?'),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      var res = await createContas(context, e);
-                                      if (res != null) {
-                                        _getMesas = getMesas(context);
-                                        Navigator.of(context,
-                                                rootNavigator: true)
-                                            .pop('dialog');
-                                        setState(() {
-                                          mesas = [];
-                                        });
-                                      }
-                                    },
-                                    child: const Text('Sim'),
-                                    style: ElevatedButton.styleFrom(
-                                      minimumSize: Size(
-                                        MediaQuery.of(context).size.width *
-                                            0.80,
-                                        40,
+                                        child: const Text('Sim'),
+                                        style: ElevatedButton.styleFrom(
+                                          minimumSize: Size(
+                                            MediaQuery.of(context).size.width *
+                                                0.80,
+                                            40,
+                                          ),
+                                          primary: Colors.red,
+                                          onPrimary: Colors.white,
+                                        ),
                                       ),
-                                      primary: Colors.red,
-                                      onPrimary: Colors.white,
-                                    ),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      Navigator.of(context, rootNavigator: true)
-                                          .pop('dialog');
-                                    },
-                                    child: const Text('Não'),
-                                    style: ElevatedButton.styleFrom(
-                                      minimumSize: Size(
-                                        MediaQuery.of(context).size.width *
-                                            0.80,
-                                        40,
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          Navigator.of(context,
+                                                  rootNavigator: true)
+                                              .pop('dialog');
+                                        },
+                                        child: const Text('Não'),
+                                        style: ElevatedButton.styleFrom(
+                                          minimumSize: Size(
+                                            MediaQuery.of(context).size.width *
+                                                0.80,
+                                            40,
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                );
+                              },
                             );
-                          },
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 4,
-                              child: Text('Mesa: ${e['number']}'),
-                            ),
-                            Expanded(
-                              flex: 4,
-                              child: Text('Lugares: ${e['seats']}'),
-                            ),
-                            Expanded(
-                              child: Text(e['busy'] ? 'Ocupada' : 'Livre'),
-                            ),
-                          ],
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: Text('Mesa: ${e['number']}'),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text('Lugares: ${e['seats']}'),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Icon(
+                                      e['busy']
+                                          ? Icons.flatware_outlined
+                                          : Icons.food_bank_outlined,
+                                      size: 30,
+                                    ),
+                                    Text(e['busy'] ? 'Ocupada' : 'Livre'),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                }
-                return Row();
-              }).toList(),
+                    );
+                  }
+                  return Row();
+                }).toList(),
+              );
+            }
+            return const Center(
+              child: CircularProgressIndicator(),
             );
           },
         ),

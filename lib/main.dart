@@ -121,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
         width: MediaQuery.of(context).size.width,
         padding: const EdgeInsets.all(15),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             const Text(
               'Eat Fast',
@@ -129,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Image.asset(
               'images/logo.png',
-              width: MediaQuery.of(context).size.width,
+              width: MediaQuery.of(context).size.width * 0.6,
               errorBuilder: (con, err, ten) {
                 return Icon(
                   Icons.error,
@@ -138,37 +138,43 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
               },
             ),
-            Container(
-              height: MediaQuery.of(context).size.longestSide * 0.14,
-              alignment: Alignment.bottomCenter,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  fixedSize: Size(MediaQuery.of(context).size.width * 0.80, 40),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const PageCardapio(),
+            Column(
+              children: [
+                Container(
+                  height: MediaQuery.of(context).size.longestSide * 0.14,
+                  alignment: Alignment.bottomCenter,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      fixedSize:
+                          Size(MediaQuery.of(context).size.width * 0.80, 40),
                     ),
-                  );
-                },
-                child: const Text('Cardapio'),
-              ),
-            ),
-            Container(
-              height: MediaQuery.of(context).size.longestSide * 0.14,
-              alignment: Alignment.bottomCenter,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  fixedSize: Size(MediaQuery.of(context).size.width * 0.80, 40),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PageCardapio(),
+                        ),
+                      );
+                    },
+                    child: const Text('Cardapio'),
+                  ),
                 ),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/login');
-                },
-                child: const Text('Entrar'),
-              ),
-            )
+                Container(
+                  height: MediaQuery.of(context).size.longestSide * 0.14,
+                  alignment: Alignment.bottomCenter,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      fixedSize:
+                          Size(MediaQuery.of(context).size.width * 0.80, 40),
+                    ),
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/login');
+                    },
+                    child: const Text('Entrar'),
+                  ),
+                )
+              ],
+            ),
           ],
         ),
       ),
