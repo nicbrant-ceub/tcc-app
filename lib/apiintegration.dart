@@ -237,9 +237,9 @@ Future<String?> putPedidos(
   bool done = false,
 ]) async {
   var token = await storage.read(key: "jwt");
-  print("///////////////////////////////////");
-  print(order['ready']);
-  print(done);
+  // print("///////////////////////////////////");
+  // print(order['ready']);
+  // print(done);
   var body = {
     'id': order['id'],
     'bill_id': order['bill_id'],
@@ -436,7 +436,7 @@ Future<Map?> putMesas(
       body: json.encode(body),
     );
     if (res.statusCode == 200) {
-      print(res.body);
+      // print(res.body);
       var cjson = json.decode(res.body);
       return cjson;
     } else {
@@ -476,7 +476,7 @@ Future<List?> getOrderItemsByBill(
       },
     );
     if (res.statusCode == 200) {
-      print(res.body);
+      // print(res.body);
       var cjson = json.decode(res.body);
       return cjson;
     } else {
@@ -518,13 +518,13 @@ Future<Map?> closeBill(
       body: json.encode(body),
     );
     if (res.statusCode == 200) {
-      print('res.body status 200');
-      print(res.body);
+      // print('res.body status 200');
+      // print(res.body);
       var cjson = json.decode(res.body);
       return cjson;
     } else {
-      print('res.body status error');
-      print(res.body);
+      // print('res.body status error');
+      // print(res.body);
       var cjson = json.decode(res.body);
       ScaffoldMessenger.of(context)
         ..removeCurrentSnackBar()

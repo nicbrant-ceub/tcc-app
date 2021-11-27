@@ -97,14 +97,18 @@ class _PedidoPageState extends State<PedidoPage> {
               Container(
                 alignment: Alignment.center,
                 color: Colors.white,
-                child: Expanded(
-                  child: DropdownButton<String>(
-                      value: _mesa,
-                      onChanged: (Object? value) {
-                        setState(() => _mesa = value.toString());
-                      },
-                      alignment: Alignment.center,
-                      items: listdropdownMesas),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text('Mesa: '),
+                    DropdownButton<String>(
+                        value: _mesa,
+                        onChanged: (Object? value) {
+                          setState(() => _mesa = value.toString());
+                        },
+                        alignment: Alignment.center,
+                        items: listdropdownMesas),
+                  ],
                 ),
               ),
             ];

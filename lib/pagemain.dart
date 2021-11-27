@@ -72,6 +72,88 @@ class _MainPageState extends State<MainPage> {
     Future _getMesas = getMesas(context);
     Future _getContas = getContas(context);
     Future _getPedidos = getPedidos(context);
+    Widget? _floatingbuttom() {
+      if (_selecteditem == 1 && user!['role']['name'] != 'ROLE_KITCHEN') {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (user!['role']['name'] != 'ROLE_ADMIM')
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const PedidoPage()),
+                    );
+                  },
+                  child: const Icon(Icons.add_shopping_cart),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PedidoPage()),
+                  );
+                },
+                child: const Icon(Icons.add),
+              ),
+            ),
+          ],
+        );
+      } else if (_selecteditem == 2 && user!['role']['name'] != 'ROLE_ADMIM') {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (user!['role']['name'] != 'ROLE_ADMIM')
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: FloatingActionButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const PedidoPage()),
+                    );
+                  },
+                  child: const Icon(Icons.add_shopping_cart),
+                ),
+              ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: FloatingActionButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PedidoPage()),
+                  );
+                },
+                child: const Icon(Icons.add_box_rounded),
+              ),
+            ),
+          ],
+        );
+      } else if (user!['role']['name'] != 'ROLE_ADMIM') {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 5),
+          child: FloatingActionButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PedidoPage()),
+              );
+            },
+            child: const Icon(Icons.add_shopping_cart),
+          ),
+        );
+      }
+      return null;
+    }
+
     final bottomNavigationBarBody = [
       if (user == null || user!['role']['name'] != 'ROLE_KITCHEN')
         RefreshIndicator(
@@ -270,7 +352,7 @@ class _MainPageState extends State<MainPage> {
                     pedidosClone = pedidos;
                   }
                 }
-                print(pedidos);
+                // print(pedidos);
                 return Column(
                   children: [
                     Padding(
@@ -664,18 +746,7 @@ class _MainPageState extends State<MainPage> {
           ],
         ),
       ),
-      floatingActionButton: user == null ||
-              user!['role']['name'] != 'ROLE_KITCHEN'
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const PedidoPage()),
-                );
-              },
-              child: const Icon(Icons.add),
-            )
-          : null,
+      floatingActionButton: _floatingbuttom(),
       body: bottomNavigationBarBody[_selecteditem],
       bottomNavigationBar:
           user == null || user!['role']['name'] != 'ROLE_KITCHEN'
