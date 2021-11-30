@@ -3,6 +3,7 @@ import 'pagelogin.dart';
 import 'pagemain.dart';
 import 'apiintegration.dart';
 import 'pagecardapio.dart';
+import 'pagecreatereserves.dart';
 import 'dart:convert' show json, base64, ascii;
 
 void main() {
@@ -157,6 +158,25 @@ class _MyHomePageState extends State<MyHomePage> {
                       );
                     },
                     child: const Text('Cardapio'),
+                  ),
+                ),
+                Container(
+                  height: MediaQuery.of(context).size.longestSide * 0.14,
+                  alignment: Alignment.bottomCenter,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      fixedSize:
+                          Size(MediaQuery.of(context).size.width * 0.80, 40),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CreateReservePage(),
+                        ),
+                      );
+                    },
+                    child: const Text('Reserva'),
                   ),
                 ),
                 Container(

@@ -547,6 +547,46 @@ Future<Map?> closeBill(
   }
 }
 
+Future<Map?> createReserve(BuildContext context, Map form) async {
+  Map body = form;
+  try {
+    var res = await http.post(
+      Uri.parse("$SERVER_IP/reserve/"),
+      headers: {
+        'Content-Type': "application/json",
+      },
+      body: json.encode(body),
+    );
+    print(json.encode(body));
+    if (res.statusCode == 200) {
+      // print(res.body);
+      var cjson = json.decode(res.body);
+      return cjson;
+    } else {
+      // print(res.body);
+      var cjson = json.decode(res.body);
+      ScaffoldMessenger.of(context)
+        ..removeCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(cjson['error'] ?? 'Ocorreu um erro'),
+          ),
+        );
+      return null;
+    }
+  } catch (error) {
+    // print(error);
+    ScaffoldMessenger.of(context)
+      ..removeCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text('$error'),
+        ),
+      );
+    return null;
+  }
+}
+
 processLogout(context) {
   storage.delete(key: 'jwt');
   storage.delete(key: 'user');

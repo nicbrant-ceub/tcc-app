@@ -73,7 +73,9 @@ class _MainPageState extends State<MainPage> {
     Future _getContas = getContas(context);
     Future _getPedidos = getPedidos(context);
     Widget? _floatingbuttom() {
-      if (_selecteditem == 1 && user!['role']['name'] != 'ROLE_KITCHEN') {
+      if (_selecteditem == 1 &&
+          user != null &&
+          user!['role']['name'] != 'ROLE_KITCHEN') {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -105,7 +107,9 @@ class _MainPageState extends State<MainPage> {
             ),
           ],
         );
-      } else if (_selecteditem == 2 && user!['role']['name'] != 'ROLE_ADMIM') {
+      } else if (_selecteditem == 2 &&
+          user != null &&
+          user!['role']['name'] != 'ROLE_ADMIM') {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -137,7 +141,7 @@ class _MainPageState extends State<MainPage> {
             ),
           ],
         );
-      } else if (user!['role']['name'] != 'ROLE_ADMIM') {
+      } else if (user != null && user!['role']['name'] != 'ROLE_ADMIM') {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 5),
           child: FloatingActionButton(
